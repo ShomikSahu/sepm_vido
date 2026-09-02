@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+hide circle
+skinparam classAttributeIconSize 0
+
+actor User
+
+rectangle "Volcanic Image/Data Observatory (VIDO)" {
+    usecase "UC-01 Browse Celestial Systems" as UC1
+    usecase "UC-02 Search & Filter Observations" as UC2
+    usecase "UC-03 Inspect Metadata Payloads" as UC3
+    usecase "UC-04 Associate Observations with Events" as UC4
+    usecase "UC-05 Explore Synchronized Timeline" as UC5
+    usecase "UC-06 Explore Spatial Coordinates" as UC6
+}
+
+User -- UC1
+User -- UC2
+User -- UC3
+User -- UC4
+User -- UC5
+User -- UC6
+@enduml

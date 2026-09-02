@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIDO - Volcanic Image/Data Observatory</title>
+
+  <!-- Leaflet CSS for Earth Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  
+  <!-- VIDO Observatory Styles -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+  <!-- Application Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon"></div>
+      <div>
+        <span class="brand-title">VOLCANIC IMAGE/DATA OBSERVATORY</span>
+        <span class="brand-subtitle">SEPM UNDERGRADUATE SCIENTIFIC MVP</span>
+      </div>
+    </div>
+    <div class="header-status">
+      <div id="loading-indicator" style="display: none; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--accent-cyan); font-family: var(--font-mono);">
+        <span>FETCHING OBSERVATORY DATA...</span>
+      </div>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>SYSTEM OPERATIONAL</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Error Banner -->
+  <div id="error-banner" style="display: none; background: rgba(255,61,0,0.2); border-bottom: 1px solid var(--accent-volcanic); color: #ff6b6b; padding: 10px 24px; font-size: 0.85rem; font-family: var(--font-mono);"></div>
+
+  <!-- Control & Selection Bar -->
+  <div class="control-bar">
+    <!-- Celestial Body Selector -->
+    <div class="control-group">
+      <span class="control-label">CELESTIAL BODY & CRS CONVENTION</span>
+      <div id="body-pills-container" class="body-selector">
+        <!-- Dynamically rendered body pills -->
+      </div>
+    </div>
+
+    <!-- Volcanic System Selector -->
+    <div class="control-group" style="min-width: 220px;">
+      <span class="control-label">VOLCANIC SYSTEM</span>
+      <select id="system-select">
+        <!-- Dynamically rendered options -->
+      </select>
+    </div>
+
+    <!-- Facet Filter Group -->
+    <div class="control-group">
+      <span class="control-label">METADATA FACET FILTER</span>
+      <div class="facet-filter-group">
+        <button class="facet-btn active" data-facet="ALL">ALL</button>
+        <button class="facet-btn" data-facet="IMAGE">IMAGE</button>
+        <button class="facet-btn" data-facet="THERMAL">THERMAL</button>
+        <button class="facet-btn" data-facet="PLANETARY_ORBITAL">PLANETARY ORBITAL</button>
+      </div>
+    </div>
+
+    <!-- Search Query -->
+    <div class="control-group" style="flex: 1; min-width: 200px;">
+      <span class="control-label">SEARCH OBSERVATIONS</span>
+      <input type="text" id="search-input" placeholder="Search by summary, instrument, or ID...">
+    </div>
+  </div>
+
+  <!-- Main Observatory Dashboard -->
+  <main class="main-layout">
+    
+    <!-- Left Column: Spatial Map/Grid & Chronological Timeline -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      
+      <!-- Spatial View Panel -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🗺️ SPATIAL OBSERVATORY VIEW</span>
+          </div>
+          <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-secondary);">
+            COORDINATE RESOLUTION ENGINE
+          </div>
+        </div>
+        <div class="panel-body" id="spatial-panel-body">
+          <!-- Leaflet Map Container for Earth -->
+          <div id="leaflet-container" style="display: block;"></div>
+
+          <!-- Canvas 2D Grid Container for Planetary Bodies -->
+          <div id="planetary-canvas-container" style="display: none;">
+            <canvas id="planetary-canvas"></canvas>
+          </div>
+
+          <!-- Spatial Legend -->
+          <div class="spatial-legend">
+            <div class="legend-item">
+              <div class="legend-color legend-obs"></div>
+              <span>EXPLICIT OBSERVATION COORDS</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color legend-fallback"></div>
+              <span>VOLCANO FALLBACK COORDS</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color legend-unlocated"></div>
+              <span>UNLOCATED</span>
+            </div>
+          </div>
+
+          <!-- Unlocated List Container -->
+          <div id="unlocated-list" style="margin-top: 12px; display: none;"></div>
+        </div>
+      </section>
+
+      <!-- Timeline View Panel -->
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>⏱️ CHRONOLOGICAL TIMELINE</span>
+          </div>
+          <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-secondary);">
+            DUAL-LANE ERUPTIVE FEED
+          </div>
+        </div>
+        <div class="panel-body" id="timeline-panel-body">
+          <!-- Dynamically rendered timeline lanes -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Observation Explorer -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <section class="panel" style="height: 100%;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📡 OBSERVATION EXPLORER</span>
+          </div>
+          <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-secondary);">
+            SCIENTIFIC EVIDENCE RECORDS
+          </div>
+        </div>
+        <div class="panel-body" id="obs-explorer-list">
+          <!-- Dynamically rendered observation summary cards -->
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- Detail Inspector Modal -->
+  <div id="inspector-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="font-size: 1rem; font-weight: 700; color: #ffffff;" id="inspector-modal-title">
+          Observation Detail Inspector
+        </div>
+        <button id="modal-close-btn" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="inspector-modal-body">
+        <!-- Dynamically rendered composite metadata inspection blocks -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  
+  <!-- Main Application JS Module -->
+  <script type="module" src="/static/js/app.js"></script>
+
+</body>
+</html>

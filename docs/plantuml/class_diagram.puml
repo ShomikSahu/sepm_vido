@@ -1,0 +1,55 @@
+@startuml
+hide circle
+skinparam classAttributeIconSize 0
+
+class CelestialBody {
+    id
+    name
+    coordinate_convention
+    mean_radius
+}
+
+class VolcanicSystem {
+    id
+    name
+    region
+    elevation
+    status
+    latitude
+    longitude
+}
+
+class ObservationSource {
+    id
+    name
+    source_type
+}
+
+class Observation {
+    id
+    timestamp
+    latitude
+    longitude
+    metadata
+}
+
+class VolcanicEvent {
+    id
+    name
+    start_time
+    end_time
+    vei
+}
+
+class ObservationEventLink {
+    id
+    relationship_type
+    temporal_offset_hours
+}
+
+CelestialBody "1" -- "*" VolcanicSystem
+VolcanicSystem "1" -- "*" Observation
+ObservationSource "1" -- "*" Observation
+Observation "1" -- "*" ObservationEventLink
+VolcanicEvent "1" -- "*" ObservationEventLink
+@enduml
